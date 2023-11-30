@@ -39,8 +39,9 @@ runs:
     - name: Deploy from storage
       uses: azure/CLI@v1
       with:
-        azcliversion: 2.19.1
+        azcliversion: 2.30.0
         inlineScript: |
+          az account show
           az extension add --name webapp
 
           az storage container create -n ${{inputs.container_name}} --account-name ${{inputs.account_name}}
