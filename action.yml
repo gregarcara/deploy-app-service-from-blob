@@ -24,13 +24,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Debug
-      shell: bash
-      run: ls -la
     - name: Zip the app contents
       uses: papeloto/action-zip@v1
       with:
-        files: ${{inputs.publish_directory}}
+        files: ./
         dest: publish.zip
     - name: Set SAS token expiration
       shell: bash
