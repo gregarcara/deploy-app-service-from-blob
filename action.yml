@@ -36,6 +36,9 @@ runs:
     - name: Set SAS token expiration
       shell: bash
       run: echo "expiry=`date -u -d 10 minutes '+%Y-%m-%dT%H:%MZ'`" >> $GITHUB_ENV
+    - name: Debug
+      shell: bash
+      run: ls -la
     - name: Deploy from storage
       uses: azure/CLI@v1
       with:
