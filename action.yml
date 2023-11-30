@@ -2,19 +2,19 @@ name: Deploy App Service
 description: Deploy an app service from a storage account in azure.
 
 inputs:
-  PUBLISH_DIRECTORY:
+  publish_directory:
     description: "The directory the project was published to."
     required: true
-  ACCOUNT_NAME:
+  account_name:
     description: "Storage account name - does not need to exist."
     required: true
-  RESOURCE_GROUP:
+  resource_group:
     description: "Resource group the storage and service app are in."
     required: true
-  CONTAINER_NAME:
+  container_name:
     description: "Name for the storage container."
     required: true
-  AZURE_CREDENTIALS:
+  azure_credentials:
     description: "Azure service principal."
     require: true
 
@@ -25,12 +25,12 @@ inputs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ inputs.AZURE_CREDENTIALS }}
+          creds: ${{inputs.azure_credentials}}
 
       - name: Zip the app contents
         uses: papeloto/action-zip@v1
         with:
-          files: ${{ inputs.PUBLISH_DIRECTORY }}
+          files: ${{inputs.publish_directory}}
         dest: publish.zip
 
       - name: Set SAS token expiration
@@ -43,10 +43,10 @@ inputs:
           inlineScript: |
             az extension add --name webapp
 
-            az storage blob upload      -f app.zip    --account-name ${{ inputs.ACCOUNT_NAME }} -c ${{ inputs.CONTAINER_NAME }} -n ${{ inputs.ACCOUNT_NAME }}
+            az storage blob upload      -f app.zip    --account-name ${{inputs.account_name}} -C ${{inputs.container_name}} -n ${{inputs.account_name}}
 
-            ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{ env.expiry }} --account-name ${{ inputs.ACCOUNT_NAME }} -c ${{ inputs.CONTAINER_NAME }} -n ${{ inputs.ACCOUNT_NAME }} | xargs)
+            ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{env.expiry}} --account-name ${{inputs.account_name}} -C ${{inputs.container_name}} -n ${{inputs.account_name}} | xargs)
 
-            az webapp deploy --name $WEBAPP --resource-group ${{ inputs.RESOURCE_GROUP }} --type zip --src-url  $ZIP_URL --async false
+            az webapp deploy --name $WEBAPP --resource-group ${{inputs.resource_group}} --type zip --src-url  $ZIP_URL --async false
 
-            az storage container delete -n ${{ inputs.CONTAINER_NAME }} --account-name ${{ inputs.ACCOUNT_NAME }} 
+            az storage container delete -n ${{inputs.container_name}} --account-name ${{inputs.account_name}} 
