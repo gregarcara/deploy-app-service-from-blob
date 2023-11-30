@@ -31,7 +31,7 @@ runs:
         dest: publish.zip
     - name: Set SAS token expiration
       shell: bash
-      run: echo "expiry=`date -u -d 10 minutes '+%Y-%m-%dT%H:%MZ'`" >> $GITHUB_ENV
+      run: echo "expiry=`date -u --date='+10 minutes' '+%Y-%m-%dT%H:%MZ'`" >> $GITHUB_ENV
     - name: Azure Login
       uses: azure/login@v1
       with:
@@ -41,7 +41,6 @@ runs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az account show
           az extension add --name webapp
 
           az storage container create -n ${{inputs.container_name}} --account-name ${{inputs.account_name}}
