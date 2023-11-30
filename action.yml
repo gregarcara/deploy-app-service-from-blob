@@ -14,34 +14,39 @@ inputs:
   CONTAINER_NAME:
     description: "Name for the storage container."
     required: true
+  AZURE_CREDENTIALS:
+    description: "Azure service principal."
+    require: true
 
   runs:
     using: "composite"
+    steps:
 
-    uses: azure/login@v1
-    with:
-      creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ inputs.AZURE_CREDENTIALS }}
 
-    - name: Zip the app contents
-      uses: papeloto/action-zip@v1
-      with:
-        files: ${{ inputs.PUBLISH_DIRECTORY }}
+      - name: Zip the app contents
+        uses: papeloto/action-zip@v1
+        with:
+          files: ${{ inputs.PUBLISH_DIRECTORY }}
         dest: publish.zip
 
-    - name: Set SAS token expiration
-      run: echo "expiry=`date -u -d 10 minutes '+%Y-%m-%dT%H:%MZ'`" >> $GITHUB_ENV
+      - name: Set SAS token expiration
+        run: echo "expiry=`date -u -d 10 minutes '+%Y-%m-%dT%H:%MZ'`" >> $GITHUB_ENV
 
-    - name: Azure CLI script
-      uses: azure/CLI@v1
-      with:
-        azcliversion: 2.19.1
-        inlineScript: |
-          az extension add --name webapp
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.19.1
+          inlineScript: |
+            az extension add --name webapp
 
-          az storage blob upload      -f app.zip    --account-name ${{ inputs.ACCOUNT_NAME }} -c ${{ inputs.CONTAINER_NAME }} -n ${{ inputs.ACCOUNT_NAME }}
+            az storage blob upload      -f app.zip    --account-name ${{ inputs.ACCOUNT_NAME }} -c ${{ inputs.CONTAINER_NAME }} -n ${{ inputs.ACCOUNT_NAME }}
 
-          ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{ env.expiry }} --account-name ${{ inputs.ACCOUNT_NAME }} -c ${{ inputs.CONTAINER_NAME }} -n ${{ inputs.ACCOUNT_NAME }} | xargs)
+            ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{ env.expiry }} --account-name ${{ inputs.ACCOUNT_NAME }} -c ${{ inputs.CONTAINER_NAME }} -n ${{ inputs.ACCOUNT_NAME }} | xargs)
 
-          az webapp deploy --name $WEBAPP --resource-group ${{ inputs.RESOURCE_GROUP }} --type zip --src-url  $ZIP_URL --async false
+            az webapp deploy --name $WEBAPP --resource-group ${{ inputs.RESOURCE_GROUP }} --type zip --src-url  $ZIP_URL --async false
 
-          az storage container delete -n ${{ inputs.CONTAINER_NAME }} --account-name ${{ inputs.ACCOUNT_NAME }} 
+            az storage container delete -n ${{ inputs.CONTAINER_NAME }} --account-name ${{ inputs.ACCOUNT_NAME }} 
