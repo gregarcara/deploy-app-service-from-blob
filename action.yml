@@ -58,6 +58,6 @@ runs:
               "type": "zip",
             }
           }'
-    az webapp deploy --name ${{inputs.service_app_name}} --resource-group ${{inputs.resource_group}} --type zip --src-url  $ZIP_URL --async false
+          az webapp deploy --name ${{inputs.service_app_name}} --resource-group ${{inputs.resource_group}} --type zip --src-url  $ZIP_URL --async false
 
-    az storage container delete -n ${{inputs.container_name}} --account-name ${{inputs.account_name}} 
+          az storage container delete -n ${{inputs.container_name}} --account-name ${{inputs.account_name}} 
