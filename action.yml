@@ -16,7 +16,10 @@ inputs:
     required: true
   azure_credentials:
     description: "Azure service principal."
-    require: true
+    required: true
+  service_app_name:
+    description: "Azure Service App name."
+    required: true
 
 runs:
   using: "composite"
@@ -44,6 +47,6 @@ runs:
 
           ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{env.expiry}} --account-name ${{inputs.account_name}} -C ${{inputs.container_name}} -n ${{inputs.account_name}} | xargs)
 
-          az webapp deploy --name $WEBAPP --resource-group ${{inputs.resource_group}} --type zip --src-url  $ZIP_URL --async false
+          az webapp deploy --name ${{inputs.service_app_name}} --resource-group ${{inputs.resource_group}} --type zip --src-url  $ZIP_URL --async false
 
           az storage container delete -n ${{inputs.container_name}} --account-name ${{inputs.account_name}} 
