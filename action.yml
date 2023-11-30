@@ -21,32 +21,24 @@ inputs:
   runs:
     using: "composite"
     steps:
-
-      - name: Azure Login
-        uses: azure/login@v1
+      - uses: azure/login@v1
         with:
-          creds: ${{github.event.inputs.azure_credentials}}
-
-      - name: Zip the app contents
-        uses: papeloto/action-zip@v1
+          creds: ${{inputs.azure_credentials}}
+      - uses: papeloto/action-zip@v1
         with:
-          files: ${{github.event.inputs.publish_directory}}
+          files: ${{inputs.publish_directory}}
         dest: publish.zip
-
-      - name: Set SAS token expiration
         run: echo "expiry=`date -u -d 10 minutes '+%Y-%m-%dT%H:%MZ'`" >> $GITHUB_ENV
-
-      - name: Azure CLI script
-        uses: azure/CLI@v1
+      - uses: azure/CLI@v1
         with:
           azcliversion: 2.19.1
           inlineScript: |
             az extension add --name webapp
 
-            az storage blob upload      -f app.zip    --account-name ${{github.event.inputs.account_name}} -C ${{github.event.inputs.container_name}} -n ${{github.event.inputs.account_name}}
+            az storage blob upload      -f app.zip    --account-name ${{inputs.account_name}} -C ${{inputs.container_name}} -n ${{inputs.account_name}}
 
-            ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{env.expiry}} --account-name ${{github.event.inputs.account_name}} -C ${{github.event.inputs.container_name}} -n ${{github.event.inputs.account_name}} | xargs)
+            ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{env.expiry}} --account-name ${{inputs.account_name}} -C ${{inputs.container_name}} -n ${{inputs.account_name}} | xargs)
 
-            az webapp deploy --name $WEBAPP --resource-group ${{github.event.inputs.resource_group}} --type zip --src-url  $ZIP_URL --async false
+            az webapp deploy --name $WEBAPP --resource-group ${{inputs.resource_group}} --type zip --src-url  $ZIP_URL --async false
 
-            az storage container delete -n ${{github.event.inputs.container_name}} --account-name ${{github.event.inputs.account_name}} 
+            az storage container delete -n ${{inputs.container_name}} --account-name ${{inputs.account_name}} 
