@@ -24,10 +24,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{inputs.azure_credentials}}
     - name: Zip the app contents
       uses: papeloto/action-zip@v1
       with:
@@ -36,12 +32,18 @@ runs:
     - name: Set SAS token expiration
       shell: bash
       run: echo "expiry=`date -u -d 10 minutes '+%Y-%m-%dT%H:%MZ'`" >> $GITHUB_ENV
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{inputs.azure_credentials}}
     - name: Deploy from storage
       uses: azure/CLI@v1
       with:
         azcliversion: 2.19.1
         inlineScript: |
           az extension add --name webapp
+
+          az storage container create -n ${{inputs.container_name}} --account-name ${{inputs.account_name}}
 
           az storage blob upload -f publish.zip --account-name ${{inputs.account_name}} -c ${{inputs.container_name}} -n ${{inputs.account_name}}
 
