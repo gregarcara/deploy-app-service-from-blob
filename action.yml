@@ -31,6 +31,7 @@ runs:
         files: ${{inputs.publish_directory}}
         dest: publish.zip
     - name: Set SAS token expiration
+      shell: bash
       run: echo "expiry=`date -u -d 10 minutes '+%Y-%m-%dT%H:%MZ'`" >> $GITHUB_ENV
     - name: Deploy from storage
       uses: azure/CLI@v1
