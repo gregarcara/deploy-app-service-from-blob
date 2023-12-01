@@ -56,7 +56,7 @@ runs:
             --body '{ 
               "properties": { 
                 "properties": {
-                  "packageUri": "${ZIP_URL}"
+                  "packageUri": "'"${ZIP_URL}"'",
                  }, 
                 "type": "zip",
               }
