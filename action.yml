@@ -41,6 +41,7 @@ runs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
+          set -x
           az extension add --name webapp
 
           az storage container create -n ${{inputs.container_name}} --account-name ${{inputs.account_name}}
