@@ -60,7 +60,7 @@ runs:
           #     }, 
           #   }'
           az rest --method PUT \
-            --uri https://management.azure.com/subscriptions/e672c783-b7a3-410c-90c7-5bc28ba7f7ac/resourceGroups/${{inputs.resource_group}}/providers/Microsoft.Web/sites/${{inputs.service_app_name}}/slots/randuatportal/extensions/MSDeploy?api-version=2022-03-01 \
+            --uri https://management.azure.com/subscriptions/e672c783-b7a3-410c-90c7-5bc28ba7f7ac/resourceGroups/${{inputs.resource_group}}/providers/Microsoft.Web/sites/${{inputs.service_app_name}}/extensions/MSDeploy?api-version=2022-03-01 \
             --body '{
               "properties": {
                 "type": "zip", 
