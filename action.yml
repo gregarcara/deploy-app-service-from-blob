@@ -2,8 +2,8 @@ name: Deploy App Service
 description: Deploy an app service from a storage account in azure.
 
 inputs:
-  publish_directory:
-    description: "The directory the project was published to."
+  publish_zip:
+    description: "The zip file containing the project to publish"
     required: true
   account_name:
     description: "Storage account name - does not need to exist."
@@ -24,11 +24,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Zip the app contents
-      uses: papeloto/action-zip@v1
-      with:
-        files: ./
-        dest: publish.zip
     - name: Set SAS token expiration
       shell: bash
       run: echo "expiry=`date -u --date='+10 minutes' '+%Y-%m-%dT%H:%MZ'`" >> $GITHUB_ENV
@@ -42,23 +37,13 @@ runs:
         azcliversion: 2.30.0
         inlineScript: |
           set -x
-          az extension add --name webapp
-
           az storage container create -n ${{inputs.container_name}} --account-name ${{inputs.account_name}}
 
-          az storage blob upload -f publish.zip --account-name ${{inputs.account_name}} -c ${{inputs.container_name}} -n ${{inputs.account_name}}
+          az storage blob upload -f ${{inputs.publish_zip}} --account-name ${{inputs.account_name}} -c ${{inputs.container_name}} -n ${{inputs.account_name}}
 
           ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{env.expiry}} --account-name ${{inputs.account_name}} -c ${{inputs.container_name}} -n ${{inputs.account_name}} | xargs)
           echo "Test"
           echo "${ZIP_URL}"
-          # az rest --method PUT \
-          #   --uri https://management.azure.com/subscriptions/e672c783-b7a3-410c-90c7-5bc28ba7f7ac/resourceGroups/${{inputs.resource_group}}/providers/Microsoft.Web/sites/${{inputs.service_app_name}}/extensions/onedeploy?api-version=2020-12-01 \
-          #   --body '{ 
-          #     "properties": { 
-          #       "packageUri": "'"${ZIP_URL}"'",
-          #       "type": "zip"
-          #     }, 
-          #   }'
           az rest --method PUT \
             --uri https://management.azure.com/subscriptions/e672c783-b7a3-410c-90c7-5bc28ba7f7ac/resourceGroups/${{inputs.resource_group}}/providers/Microsoft.Web/sites/${{inputs.service_app_name}}/extensions/onedeploy?api-version=2020-12-01 \
             --body '{
@@ -67,5 +52,4 @@ runs:
                 "packageUri": "'"${ZIP_URL}"'"
               }
             }'
-          # az webapp deploy --name ${{inputs.service_app_name}} --resource-group ${{inputs.resource_group}} --type zip --src-url  $ZIP_URL --async true
           az storage container delete -n ${{inputs.container_name}} --account-name ${{inputs.account_name}} 
