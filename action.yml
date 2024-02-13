@@ -39,8 +39,6 @@ runs:
           az storage blob upload -f ./publish.zip --account-name ${{inputs.account_name}} -c ${{inputs.container_name}} -n ${{inputs.account_name}}
 
           ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{env.expiry}} --account-name ${{inputs.account_name}} -c ${{inputs.container_name}} -n ${{inputs.account_name}} | xargs)
-          echo "Test"
-          echo "${ZIP_URL}"
           az rest --method PUT \
             --uri https://management.azure.com/subscriptions/e672c783-b7a3-410c-90c7-5bc28ba7f7ac/resourceGroups/${{inputs.resource_group}}/providers/Microsoft.Web/sites/${{inputs.service_app_name}}/extensions/onedeploy?api-version=2020-12-01 \
             --body '{
