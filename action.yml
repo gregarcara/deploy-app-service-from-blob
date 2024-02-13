@@ -2,9 +2,6 @@ name: Deploy App Service
 description: Deploy an app service from a storage account in azure.
 
 inputs:
-  publish_zip:
-    description: "The zip file containing the project to publish"
-    required: true
   account_name:
     description: "Storage account name - does not need to exist."
     required: true
@@ -39,7 +36,7 @@ runs:
           set -x
           az storage container create -n ${{inputs.container_name}} --account-name ${{inputs.account_name}}
 
-          az storage blob upload -f ${{inputs.publish_zip}} --account-name ${{inputs.account_name}} -c ${{inputs.container_name}} -n ${{inputs.account_name}}
+          az storage blob upload -f ./publish.zip --account-name ${{inputs.account_name}} -c ${{inputs.container_name}} -n ${{inputs.account_name}}
 
           ZIP_URL=$(az storage blob generate-sas --full-uri --permissions r --expiry ${{env.expiry}} --account-name ${{inputs.account_name}} -c ${{inputs.container_name}} -n ${{inputs.account_name}} | xargs)
           echo "Test"
